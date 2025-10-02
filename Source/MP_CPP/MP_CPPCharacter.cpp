@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "MP_CPP.h"
+#include "Net/UnrealNetwork.h"
 
 AMP_CPPCharacter::AMP_CPPCharacter()
 {
@@ -65,6 +66,8 @@ void AMP_CPPCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMP_CPPCharacter::Look);
+
+		EnhancedInputComponent->BindAction(GeneralInput, ETriggerEvent::Started, this, &AMP_CPPCharacter::OnGeneralInput);
 	}
 	else
 	{
@@ -131,3 +134,27 @@ void AMP_CPPCharacter::DoJumpEnd()
 	// signal the character to stop jumping
 	StopJumping();
 }
+
+void AMP_CPPCharacter::OnGeneralInput()
+{
+	GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, FString::Printf(TEXT("Armor : %f"),Armor));
+}
+
+USkeletalMeshComponent* AMP_CPPCharacter::GetSkeletalMeshComponent_Implementation() const
+{
+	return GetMesh();
+}
+
+void AMP_CPPCharacter::GrantArmor_Implementation(float ArmorAmount)
+{
+	Armor += ArmorAmount;
+}
+
+void AMP_CPPCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+	
+	//3.传输给 DOREPLIFETIME
+	DOREPLIFETIME(ThisClass,Armor);
+}
+

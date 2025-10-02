@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Interface/MP_Player.h"
 #include "Logging/LogMacros.h"
 #include "MP_CPPCharacter.generated.h"
 
@@ -19,7 +20,7 @@ DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
  *  Implements a controllable orbiting camera
  */
 UCLASS(abstract)
-class AMP_CPPCharacter : public ACharacter
+class AMP_CPPCharacter : public ACharacter,public IMP_Player
 {
 	GENERATED_BODY()
 
@@ -92,5 +93,28 @@ public:
 
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+
+	//////-----以下为课程内容-----//////
+public:
+	UFUNCTION(BlueprintCallable, Category="Input")
+	virtual void OnGeneralInput();
+
+	UPROPERTY(EditAnywhere, Category="Input")
+	UInputAction* GeneralInput;
+	
+	/** IMP_Player*/
+	virtual USkeletalMeshComponent* GetSkeletalMeshComponent_Implementation() const override;
+	
+	virtual void GrantArmor_Implementation(float ArmorAmount) override;
+
+	//1.重写GetLifetimeReplicatedProps函数
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+private:
+	//2.添加带有Replicated标记的宏
+	UPROPERTY(Replicated)
+	float Armor = 0;
+	
 };
 
